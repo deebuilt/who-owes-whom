@@ -216,14 +216,31 @@ const Index = () => {
         )}
 
         {/* Settlement Summary */}
-        {expenses.length > 0 && (
+        {expenses.length > 0 && (() => {
+          const paidByPerson = people.map((p) => ({
+            person: p,
+            paid: expenses.filter((e) => e.paidBy === p.id).reduce((s, e) => s + e.amount, 0),
+          }));
+          const topPayer = paidByPerson.reduce((a, b) => (b.paid > a.paid ? b : a));
+          const balances = paidByPerson.map(({ person, paid }) => ({
+            person,
+            paid,
+            net: Math.round((paid - share) * 100) / 100,
+          }));
+          // Sort: owed first (desc), then owes (desc magnitude)
+          const sortedBalances = [...balances].sort((a, b) => b.net - a.net);
+          const contextLine = topPayer.paid > 0
+            ? `${topPayer.person.initial} covered most of the group`
+            : null;
+
+          return (
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Totals */}
-              <div className="space-y-1">
+              {/* Totals + context */}
+              <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Total spent</span>
                   <span className="font-semibold text-foreground">${total.toFixed(2)}</span>
@@ -232,38 +249,21 @@ const Index = () => {
                   <span className="text-muted-foreground">Equal share</span>
                   <span className="font-semibold text-foreground">${share.toFixed(2)}</span>
                 </div>
+                {contextLine && (
+                  <p className="text-sm text-muted-foreground italic">{contextLine}</p>
+                )}
               </div>
 
-              {/* Paid */}
-              <div className="space-y-1.5 border-t pt-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Paid</p>
-                {people.map((p) => {
-                  const paid = expenses
-                    .filter((e) => e.paidBy === p.id)
-                    .reduce((s, e) => s + e.amount, 0);
-                  return (
-                    <div key={p.id} className="flex justify-between text-sm">
-                      <span className="text-foreground">{p.initial} paid</span>
-                      <span className="font-medium text-foreground">${paid.toFixed(2)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Balances */}
+              {/* Balances — primary focus */}
               <div className="space-y-1.5 border-t pt-3">
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balances</p>
-                {people.map((p) => {
-                  const paid = expenses
-                    .filter((e) => e.paidBy === p.id)
-                    .reduce((s, e) => s + e.amount, 0);
-                  const net = Math.round((paid - share) * 100) / 100;
+                {sortedBalances.map(({ person, net }) => {
                   const isOwed = net > 0.005;
                   const owes = net < -0.005;
                   return (
                     <div
-                      key={p.id}
-                      className={`flex justify-between rounded-md px-2.5 py-1.5 text-sm ${
+                      key={person.id}
+                      className={`flex justify-between rounded-md px-2.5 py-2 ${
                         isOwed
                           ? "bg-green-500/10 text-green-700 dark:text-green-400"
                           : owes
@@ -271,14 +271,14 @@ const Index = () => {
                           : "text-muted-foreground"
                       }`}
                     >
-                      <span className="font-medium">
+                      <span className={isOwed || owes ? "font-semibold" : "font-medium"}>
                         {isOwed
-                          ? `${p.initial} is owed`
+                          ? `${person.initial} is owed`
                           : owes
-                          ? `${p.initial} owes`
-                          : `${p.initial} is settled`}
+                          ? `${person.initial} owes`
+                          : `${person.initial} is settled`}
                       </span>
-                      <span className="font-semibold">
+                      <span className={`${isOwed || owes ? "text-base font-bold" : "font-medium"}`}>
                         {net === 0 ? "—" : `$${Math.abs(net).toFixed(2)}`}
                       </span>
                     </div>
@@ -311,9 +311,28 @@ const Index = () => {
                   All settled up! 🎉
                 </p>
               )}
+
+              {/* Paid — secondary detail */}
+              <div className="space-y-1 border-t pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Paid</p>
+                {paidByPerson.map(({ person, paid }) => (
+                  <div
+                    key={person.id}
+                    className={`flex justify-between text-sm ${
+                      person.id === topPayer.person.id && topPayer.paid > 0
+                        ? "font-semibold text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    <span>{person.initial} paid</span>
+                    <span>${paid.toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
-        )}
+          );
+        })()}
       </main>
     </div>
   );
