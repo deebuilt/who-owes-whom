@@ -1,25 +1,50 @@
-# Who Paid? — Shared Expense Tracker
 
-A mobile-first, single-page app for tracking group expenses and calculating settlements in real time.
 
-## Sections (top to bottom)
+# Ship "Who Paid?" to Google Play Store
 
-1. **Header** — App title "Who Paid?" with a Reset button
-2. **People Setup** — Stepper to set number of people (2-10), with editable initials (default A, B, C...)
-3. **Add Expense** — Amount input, payer selection (tap chips), optional label, "Add Expense" button
-4. **Expense List** — Clean list showing label, amount, and who paid, with delete option per item
-5. **Settlement Summary** — Total spent, equal share per person, and minimal settlement transactions (e.g. "A → B: $18.00")
+## Overview
+Prepare the app for Google Play distribution using Capacitor (wraps the web app as a native Android app), plus generate store assets and add a privacy policy page.
 
-## Design
+## Tasks
 
-- Clean, modern, mobile-first layout with card-based sections
-- Tap-to-select chips for payer selection
-- Accent color for primary actions
-- All client-side, no backend, optional localStorage persistence
-- Global styling with dark mode support
+### 1. Set up Capacitor for Android
+- Install `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`
+- Run `npx cap init` with appId `app.lovable.248c63ecd4654a7e82fb2ca6dab5429d` and appName `Who Paid?`
+- Configure `capacitor.config.ts` with the sandbox preview URL for dev, and the built `dist` folder for production
 
-## Logic
+### 2. Create Web App Manifest
+- Add a `public/manifest.json` with app name, short name, icons, theme color, background color, display mode (`standalone`), and start URL
+- Update `index.html` with `<link rel="manifest">`, proper `<title>`, theme-color meta tag, and mobile-optimized meta tags
 
-- Settlement uses greedy algorithm to minimize number of transactions
-- All amounts rounded to 2 decimal places with balanced totals
-- &nbsp;
+### 3. Create App Icons
+- Generate a set of PNG icons at required sizes (192×192, 512×512) using the app's primary color and "WP?" text
+- Place in `public/icons/` folder
+
+### 4. Generate Play Store Screenshots
+- Take screenshots of the app at key states (empty, with expenses, with settlements) at phone viewport size
+- Wrap them in polished product-shot frames
+- Save to `/mnt/documents/play-store-screenshots/`
+
+### 5. Add Privacy Policy Page
+- Create `/privacy` route with a simple, clean privacy policy page
+- Content: no data collection, no accounts, no analytics, all data stays on-device
+- Add a link to the privacy page in the app footer
+
+### 6. Update index.html Metadata
+- Set title to "Who Paid?"
+- Update description and OG tags to match the app
+
+## What You'll Need To Do (after approval)
+After I implement all of the above, you'll need to:
+1. Export to GitHub and clone locally
+2. Run `npm install` then `npx cap add android`
+3. Run `npm run build && npx cap sync`
+4. Open in Android Studio with `npx cap open android`
+5. Build a signed APK/AAB for Play Store submission
+6. Upload screenshots from `/mnt/documents/play-store-screenshots/` to your Play Console listing
+
+## Technical Details
+- **Capacitor** wraps your existing React SPA as a native Android app with a WebView
+- **No backend needed** — the app remains fully client-side
+- **Privacy policy** is required by Google Play for all apps
+
