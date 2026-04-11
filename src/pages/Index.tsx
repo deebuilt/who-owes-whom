@@ -219,19 +219,77 @@ const Index = () => {
         {expenses.length > 0 && (
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Settlement</CardTitle>
+              <CardTitle className="text-base">Summary</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Total</span>
-                <span className="font-semibold text-foreground">${total.toFixed(2)}</span>
+            <CardContent className="space-y-4">
+              {/* Totals */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Total spent</span>
+                  <span className="font-semibold text-foreground">${total.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Equal share</span>
+                  <span className="font-semibold text-foreground">${share.toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Per person</span>
-                <span className="font-semibold text-foreground">${share.toFixed(2)}</span>
+
+              {/* Paid */}
+              <div className="space-y-1.5 border-t pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Paid</p>
+                {people.map((p) => {
+                  const paid = expenses
+                    .filter((e) => e.paidBy === p.id)
+                    .reduce((s, e) => s + e.amount, 0);
+                  return (
+                    <div key={p.id} className="flex justify-between text-sm">
+                      <span className="text-foreground">{p.initial} paid</span>
+                      <span className="font-medium text-foreground">${paid.toFixed(2)}</span>
+                    </div>
+                  );
+                })}
               </div>
+
+              {/* Balances */}
+              <div className="space-y-1.5 border-t pt-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Balances</p>
+                {people.map((p) => {
+                  const paid = expenses
+                    .filter((e) => e.paidBy === p.id)
+                    .reduce((s, e) => s + e.amount, 0);
+                  const net = Math.round((paid - share) * 100) / 100;
+                  const isOwed = net > 0.005;
+                  const owes = net < -0.005;
+                  return (
+                    <div
+                      key={p.id}
+                      className={`flex justify-between rounded-md px-2.5 py-1.5 text-sm ${
+                        isOwed
+                          ? "bg-green-500/10 text-green-700 dark:text-green-400"
+                          : owes
+                          ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      <span className="font-medium">
+                        {isOwed
+                          ? `${p.initial} is owed`
+                          : owes
+                          ? `${p.initial} owes`
+                          : `${p.initial} is settled`}
+                      </span>
+                      <span className="font-semibold">
+                        {net === 0 ? "—" : `$${Math.abs(net).toFixed(2)}`}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Settle Up */}
               {settlements.length > 0 ? (
                 <div className="space-y-2 border-t pt-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Settle Up</p>
                   {settlements.map((t, i) => (
                     <div
                       key={i}
