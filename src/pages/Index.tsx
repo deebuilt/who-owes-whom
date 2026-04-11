@@ -333,12 +333,6 @@ const Index = () => {
           </Card>
           );
         })()}
-                  All settled up! 🎉
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );
