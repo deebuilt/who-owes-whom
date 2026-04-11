@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -333,6 +334,13 @@ const Index = () => {
           </Card>
           );
         })()}
+
+        {/* Footer */}
+        <footer className="pt-4 pb-2 text-center">
+          <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground underline">
+            Privacy Policy
+          </Link>
+        </footer>
       </main>
     </div>
   );
